@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Srijani — My Universe 💞</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+
+<style>
+html, body {
+  margin:0; padding:0; height:100%; overflow:hidden;
+  background:radial-gradient(ellipse at bottom,#0a0a0f 0%,#000);
+}
+canvas {position:fixed; top:0; left:0;}
+
+.overlay {
+  position:absolute; z-index:2; top:50%; left:50%;
+  transform:translate(-50%,-50%); text-align:center; color:white;
+  width:90%; max-width:750px;
+}
+h1 {
+  font-family:'Great Vibes', cursive; font-size:2.1rem; color:#ffb6d9;
+  text-shadow:0 0 20px #ff6fa0,0 0 40px #ffaad6;
+  animation: glow 3s ease-in-out infinite alternate; margin-bottom:15px;
+}
+@keyframes glow {from {text-shadow:0 0 10px #ff4f8b;} to {text-shadow:0 0 40px #ffcce2;}}
+
+#feelings {
+  font-family:'Poppins',sans-serif; font-size:1.1rem; color:rgba(255,255,255,0.9);
+  margin-top:20px; line-height:1.8; opacity:0; transition:opacity 1s ease;
+}
+.heart-text {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  font-family:'Poppins',sans-serif; font-size:0.9rem;
+  color:rgba(255,255,255,0.7); text-align:center; z-index:3;
+}
+
+/* Buttons at bottom */
+.control-buttons {
+  position: fixed;
+  bottom: -100px; /* ya 30px, jitna neeche chahiye */
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: 12px 0;
+  background: rgba(10,10,15,0.85);
+  box-shadow: 0 -2px 10px rgba(255,100,150,0.5);
+  z-index: 5;
+}
+
+.control-buttons button {
+  margin:0 10px; padding:10px 28px; border:none; border-radius:40px;
+  background:linear-gradient(90deg,#ff4f8b,#ffc3de);
+  color:black; font-family:'Poppins',sans-serif; font-size:1rem; font-weight:600;
+  cursor:pointer; box-shadow:0 0 18px rgba(255,160,200,0.8); transition:all 0.3s ease;
+}
+.control-buttons button:hover {
+  transform:scale(1.1); box-shadow:0 0 28px rgba(255,200,230,1);
+}
+
+/* Letter Modal */
+.letter {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.92); display:flex; justify-content:center; align-items:center;
+  z-index:25; opacity:0; pointer-events:none; transition:opacity 1s ease;
+}
+.letter.active {opacity:1; pointer-events:all;}
+.letter-content {
+  background:#fff1fa; color:#3b0033; font-family:'Poppins',sans-serif; border-radius:20px;
+  padding:40px; max-width:700px; box-shadow:0 0 40px rgba(255,150,200,0.7);
+  text-align:left; transform:translateY(40px); opacity:0;
+}
+.letter-content {
+  background:#fff1fa; color:#3b0033;
+  font-family:'Poppins',sans-serif; border-radius:20px;
+  padding:40px; max-width:700px; box-shadow:0 0 40px rgba(255,150,200,0.7);
+  text-align:left; transform:translateY(40px); opacity:0;
+  max-height:80vh;         /* Yeh line add karo */
+  overflow-y:auto;         /* Yeh line add karo */
+}
+
+.letter-content h2 {font-family:'Great Vibes', cursive; font-size:2.4rem; color:#ff4f8b; margin-bottom:15px;}
+.letter-content p {font-size:1.1rem; line-height:1.8; text-align:justify;}
+.close-letter {
+  display:block; margin:25px auto 0 auto; padding:10px 30px; border:none; border-radius:30px;
+  background:linear-gradient(90deg,#ff6fa0,#ffcbe5); font-weight:600; cursor:pointer;
+  box-shadow:0 0 15px rgba(255,160,200,0.8); transition:0.3s;
+}
+.close-letter:hover {transform:scale(1.1);}
+
+/* Universe gallery */
+.universe-gallery {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.9); display:flex; justify-content:center; align-items:center;
+  overflow:hidden; z-index:20; opacity:0; pointer-events:none; transition:opacity 1s ease;
+}
+.universe-gallery.active {opacity:1; pointer-events:all;}
+.universe-gallery img {
+  position:absolute; width:50%; max-width:400px; border-radius:20px;
+  opacity:0; box-shadow:0 0 40px rgba(255, 150, 200, 0.6);
+  transition: opacity 1.5s ease, transform 2s ease;
+}
+.close-gallery {
+  position:absolute; bottom:30px; background:linear-gradient(90deg,#ff6fa0,#ffcbe5);
+  color:black; padding:10px 30px; border-radius:30px; font-weight:600; cursor:pointer; border:none;
+  box-shadow:0 0 15px rgba(255,160,200,0.8); transition:0.3s;
+}
+.close-gallery:hover {transform:scale(1.1);}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div class="overlay">
+  <h1>For My Universe — Srijani 🌌</h1>
+  <div id="feelings"></div>
+
+
+  <div class="control-buttons">
+    <button id="showLetterBtn">Open My Letter 💌</button>
+    <button id="showFeelingsBtn">Show Feelings 💫</button>
+    <button id="showUniverseBtn">Wanna See My Universe 🌠</button>
+  </div>
+</div>
+
+<div class="letter" id="letter">
+  <div class="letter-content" id="letterContent">
+    <h2>My Dearest Srijani, 💖</h2>
+    <p>
+Hello Sri ❤ I still remember how we first met in that GC how our first conversation started so unexpectedly and how we ended up watching Rav together and having those late night Lookism talks I remember everything our first video call our first normal call every moment feels special when it is with you I never write paragraphs for anyone but look at me here writing so much just for you because that is what you do to me I love you a lot and you truly are the best woman ever You know what I love the most about you You understand me even when I cannot explain myself You console me whenever I break You make me smile even on the worst days And you did things you never thought you would do for someone you met online in a GC You have always been loyal always been real always been you And that you is perfect for me Sometimes words fail me but my heart does not You are the best thing that ever happened to me I LOVE YOU SO MUCHHHH 💞
+<br><br>
+You’re not just my love, Sri — you’re my story, my calm, my chaos, my reason to believe that souls truly meet for a purpose. Every second without you feels incomplete, and every breath with you feels like eternity wrapped in warmth.
+<br><br>
+I don’t need galaxies or wishes anymore; because when I found you — I found my forever. 🌙💞
+<br><br>
+Every memory with you feels like a treasure I will keep forever. Your laughter is my favorite song, your smile my guiding light. Even in silence, I hear your heartbeat, reminding me that love is not just words, but a feeling beyond time.
+<br>
+I promise to hold your hand through every storm and dance with you under every sunrise. My heart belongs to you, completely and endlessly.
+</p>
+
+    <button class="close-letter" id="closeLetter">Close Letter 💕</button>
+  </div>
+</div>
+
+<div class="universe-gallery" id="gallery">
+  <img src="1.jpg" alt="Universe 1">
+  <img src="2.jpg" alt="Universe 2">
+  <img src="3.jpg" alt="Universe 3">
+  <img src="4.jpg" alt="Universe 4">
+  <button class="close-gallery" id="closeGallery">Close Universe 💞</button>
+</div>
+
+<script>
+// THREE.js setup
+const canvas = document.querySelector('#scene');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+renderer.setSize(innerWidth, innerHeight);
+camera.position.set(0,0,6);
+
+// Lights
+const light = new THREE.PointLight(0xff6fb7,2,30); light.position.set(3,3,5);
+scene.add(light); scene.add(new THREE.AmbientLight(0xffffff,0.25));
+
+// Heart
+const shape = new THREE.Shape();
+shape.moveTo(0,0); shape.bezierCurveTo(0,0,-1,-1,-2.2,0);
+shape.bezierCurveTo(-3,0.8,-3,2,-3,2); shape.bezierCurveTo(-3,3,-1.5,4,0,5);
+shape.bezierCurveTo(1.5,4,3,3,3,2); shape.bezierCurveTo(3,2,3,0.8,2.2,0);
+shape.bezierCurveTo(1,-1,0,0,0,0);
+const heartGeo = new THREE.ExtrudeGeometry(shape,{depth:0.4,bevelEnabled:true,bevelSize:0.05});
+const heartMat = new THREE.MeshPhongMaterial({color:0xff4f8b,emissive:0xff1c5c,shininess:200,specular:0xffe1ed});
+const heart = new THREE.Mesh(heartGeo,heartMat);
+heart.position.set(0,1,0); heart.rotation.x=Math.PI; heart.scale.set(0.18,0.18,0.18);
+scene.add(heart);
+
+// Mini floating hearts
+const heartsGroup = new THREE.Group();
+for(let i=0;i<12;i++){
+  const mini = heart.clone();
+  mini.scale.set(0.05,0.05,0.05);
+  const angle = (i/12)*Math.PI*2;
+  mini.position.set(Math.cos(angle)*2.5, Math.sin(angle)*2.5, 0);
+  heartsGroup.add(mini);
+}
+scene.add(heartsGroup);
+
+// Stars
+const particlesGeometry = new THREE.BufferGeometry();
+const count = 1000; const positions = new Float32Array(count*3);
+for(let i=0;i<count*3;i++) positions[i]=(Math.random()-0.5)*100;
+particlesGeometry.setAttribute('position',new THREE.BufferAttribute(positions,3));
+const particlesMaterial = new THREE.PointsMaterial({color:0xffd6f5,size:0.5,transparent:true,opacity:0.8});
+const stars = new THREE.Points(particlesGeometry,particlesMaterial);
+scene.add(stars);
+
+// Animations
+gsap.to(heart.scale,{x:0.2,y:0.2,z:0.2,duration:1.2,yoyo:true,repeat:-1,ease:"sine.inOut"});
+gsap.to(heart.rotation,{y:Math.PI*2,duration:18,repeat:-1,ease:"none"});
+gsap.to(heartsGroup.rotation,{z:Math.PI*2,duration:40,repeat:-1,ease:"none"});
+
+function animate(){
+  requestAnimationFrame(animate);
+  stars.rotation.y += 0.0005;
+  renderer.render(scene,camera);
+}
+animate();
+
+// Feelings
+const feelings = document.getElementById('feelings');
+const showFeelingsBtn = document.getElementById('showFeelingsBtn');
+const lines = [
+  "You are the calm in my chaos, my sweetest melody 💖",
+  "Your eyes speak a language my soul instantly understands ✨",
+  "Every heartbeat hums your name like a sacred rhythm 💞",
+  "You painted my nights with stars and my days with hope 🌤️",
+  "In you, I found the home my heart had always been searching for 🕊️",
+  "You’re not my dream anymore — you’re my reality 🌹",
+  "When you smile, even the stars take a pause to adore you 🌠",
+  "I don’t need the moon — your love already lights my world 🌙"
+];
+
+let currentIndex = 0;
+
+showFeelingsBtn.addEventListener('click', () => {
+  feelings.style.opacity = 1; // ensure visible
+  feelings.innerText = lines[currentIndex];
+  currentIndex++;
+  if(currentIndex === lines.length) currentIndex = 0; // loop back
+});
+
+
+
+// Letter modal
+const letter = document.getElementById('letter');
+const letterContent = document.getElementById('letterContent');
+const showLetterBtn = document.getElementById('showLetterBtn');
+const closeLetter = document.getElementById('closeLetter');
+showLetterBtn.addEventListener('click',()=>{
+  letter.classList.add('active');
+  gsap.to(letterContent,{opacity:1,y:0,duration:1.2,ease:"power2.out"});
+});
+closeLetter.addEventListener('click',()=>{
+  gsap.to(letterContent,{opacity:0,y:40,duration:0.8});
+  setTimeout(()=>letter.classList.remove('active'),900);
+});
+
+// Universe gallery
+const gallery = document.getElementById('gallery');
+const showUniverseBtn = document.getElementById('showUniverseBtn');
+const closeGallery = document.getElementById('closeGallery');
+const images = gallery.querySelectorAll('img');
+showUniverseBtn.addEventListener('click',()=>{
+  gallery.classList.add('active');
+  let delay=0;
+  images.forEach((img)=>{
+    gsap.fromTo(img,{opacity:0, y:50},{opacity:1,y:0,duration:1.2,delay:delay,onComplete:()=>{
+      gsap.to(img,{opacity:0,delay:2,duration:1.2});
+    }});
+    delay+=3;
+  });
+});
+closeGallery.addEventListener('click',()=>{
+  gallery.classList.remove('active');
+  images.forEach(img=>img.style.opacity=0);
+});
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+
+});
+</script>
+</body>
+</html>
